@@ -108,29 +108,133 @@ public class Algorithms
 
         return pivot1; 
     }
-    
+
+
+
+    public static int FindMedian(int[] arr, int left, int right){
+        Arrays.sort(arr, left, right);
+
+        return arr[left + (right - left)/2];
+
+    }
+
+    public static int Partition(int[] arr, int left, int right, int value){
+        int count;
+
+        for (count = left; count < right; count++){
+            if (arr[count] == value){
+                int temp = arr[count];
+                arr[count] = arr[right];
+                arr[right] = temp;
+
+            }
+        }
+
+        count = left;
+        for (int i = left; i < right; i++) {
+            if (arr[i] <= value) {
+                int temp = arr[count];
+                arr[count] = arr[i];
+                arr[i] = temp;
+
+                count++;
+            }
+        }
+        int temp = arr[count];
+        arr[count] = arr[right];
+        arr[right] = temp;
+
+        return count;
+
+    }
+
+
+    public static  int mmRulePartition (int[] arr, int left, int right, int k){
+        if (k > 0 && k <= right - left + 1){
+            int numOfElements = right - left + 1;
+            int numOfGroups = (numOfElements + 6) / 7;
+            int[] median = new int[numOfGroups];
+            int count;
+
+            for(count = 0; count < numOfElements / 7; count++){
+                median[count]= FindMedian(arr,left + count * 7,left + count * 7 + 7);
+
+            }
+
+            if (count * 7 < numOfElements){
+                median[count]= FindMedian(arr, left + count * 7, left + count * 7 + numOfElements % 7);
+                count++;
+
+            }
+
+            int mOfm;
+            if (count == 1){
+                mOfm = median[count - 1];
+            }else {
+                mOfm = mmRulePartition(median, 0, count - 1, count / 2);
+            }
+
+            int location = Partition(arr, left, right, mOfm);
+
+            if (location - left == k - 1){
+                return arr[location];
+
+            }else if (location - left > k - 1){
+                return mmRulePartition(arr, left, location - 1, k);
+
+            }
+            else {
+                return mmRulePartition(arr, location + 1, right, k - location + left - 1);
+
+            }
+
+        }else {
+            int v = -1;
+            return v;
+        }
+
+
+    }
+
+
+    public static int[] fillArray(int[] arr, int n){
+        Random r = new Random();
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = r.nextInt(2000);
+        }
+        return arr;
+    }
 
     public static void main (String[] args) {
-       int array[] = new int[2000]; 
-        Random r = new Random(); 
+        Algorithms alg= new Algorithms();
+        int n = 2000;
+        long sum = 0;
 
-        for (int i = 0; i < array.length; i++) {
-            array[i] = r.nextInt(2000);
+        int array[] = new int[n];
+        fillArray(array,n);
+
+        int k = 1;
+
+
+        for (int i = 0; i < 15; i++){
+            long start = System.nanoTime();
+            int result = mmRulePartition(array, 0, array.length - 1, k);
+            long end = System.nanoTime();
+            long total = end - start;
+            sum += total;
+//            System.out.println("The result is: " + result);
+            System.out.print("The "+ i+1 +  " run time is: ");
+            System.out.println(total);
         }
-        
-        int k = 2000; 
+        System.out.println();
+        System.out.println("The average time is: " + sum/15 + " nanoseconds");
 
-       
-        long start = System.nanoTime(); 
 
-        //Algorithms alg= new Algorithms(); 
-        Algorithms.quickSortIterative(array, 0, array.length - 1); 
-        System.out.println(array[k-1]); 
+//        Algorithms alg= new Algorithms();
+//        quickSortIterative(array, 0, array.length - 1);
+//        System.out.println(array[k-1]);
 
-        long end = System.nanoTime(); 
-        long total = end - start;
-        System.out.println("The run time is: "); 
-        System.out.println(total); 
+
 }
 }
 
